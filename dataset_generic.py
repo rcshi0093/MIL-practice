@@ -335,11 +335,11 @@ class Generic_MIL_Dataset(Generic_WSI_Classification_Dataset):
 		pt_dir = os.path.abspath("C:/Users/Administrator/Desktop/features_data/SWD139/TRIDENT_conch1-5/trident_conch1-5_h5_to_CLAM_pt")  # 使用绝对路径
 		full_path = os.path.join(pt_dir, f"{slide_id}.pt")
 		features = torch.load(full_path, weights_only=True)  # 顺便解决之前的 FutureWarning
-	    # 新增：特征归一化（若已计算均值和标准差）
-	    if self.feat_mean is not None and self.feat_std is not None:
-	        # 防止标准差为0导致除零错误
-	        self.feat_std = torch.where(self.feat_std == 0, torch.tensor(1.0, dtype=self.feat_std.dtype), self.feat_std)
-	        features = (features - self.feat_mean) / self.feat_std  # 标准化
+		# 新增：特征归一化（若已计算均值和标准差）
+		if self.feat_mean is not None and self.feat_std is not None:
+			# 防止标准差为0导致除零错误
+			self.feat_std = torch.where(self.feat_std == 0, torch.tensor(1.0, dtype=self.feat_std.dtype), self.feat_std)
+			features = (features - self.feat_mean) / self.feat_std  # 标准化
 		# print(f"Slide {slide_id}: 特征维度 = {features.size(1)}") 
 		# 检查特征是否为空（实例数为 0）
 		if features.size(0) == 0:
@@ -390,23 +390,23 @@ class Generic_Split(Generic_MIL_Dataset):
 		return len(self.slide_data)
 
 	# 新增方法：获取当前拆分集中所有样本的标签
-    def get_labels(self):
-        """返回当前数据集中所有样本的标签列表"""
-        return self.slide_data['label'].tolist()  # 直接从slide_data提取标签
-    # 新增：计算当前数据集的特征均值和标准差（用于训练集归一化）
-    def compute_feat_stats(self):
-        """计算所有样本的特征均值和标准差（按特征维度）"""
-        all_feats = []
-        for i in range(len(self)):
-            # 加载第i个样本的特征（仅取特征部分）
-            feats, _, _ = self.__getitem__(i)
-            all_feats.append(feats)
-        # 拼接所有特征（shape: [总实例数, 特征维度]）
-        all_feats = torch.cat(all_feats, dim=0)
-        # 计算均值和标准差（按特征维度）
-        self.feat_mean = torch.mean(all_feats, dim=0)
-        self.feat_std = torch.std(all_feats, dim=0)
-        return self.feat_mean, self.feat_std        
+	def get_labels(self):
+		"""返回当前数据集中所有样本的标签列表"""
+		return self.slide_data['label'].tolist()  # 直接从slide_data提取标签
+	# 新增：计算当前数据集的特征均值和标准差（用于训练集归一化）
+	def compute_feat_stats(self):
+		"""计算所有样本的特征均值和标准差（按特征维度）"""
+		all_feats = []
+		for i in range(len(self)):
+			# 加载第i个样本的特征（仅取特征部分）
+			feats, _, _ = self.__getitem__(i)
+			all_feats.append(feats)
+		# 拼接所有特征（shape: [总实例数, 特征维度]）
+		all_feats = torch.cat(all_feats, dim=0)
+		# 计算均值和标准差（按特征维度）
+		self.feat_mean = torch.mean(all_feats, dim=0)
+		self.feat_std = torch.std(all_feats, dim=0)
+		return self.feat_mean, self.feat_std        
 		
 
 
